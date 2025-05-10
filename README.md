@@ -137,253 +137,258 @@
 
 </div>
 
-# 프로젝트 테스트
-- 레포지토리 복사하기
+# 🏠 채우다(Chaeuda) - 부동산 매물 플랫폼
+
+![Python](https://img.shields.io/badge/Python-3.12-blue)
+![Django](https://img.shields.io/badge/Django-5.1.6-green)
+![Docker](https://img.shields.io/badge/Docker-Compose-blue)
+![Nginx](https://img.shields.io/badge/Nginx-1.21-brightgreen)
+![CI/CD](https://img.shields.io/badge/CI/CD-GitHub_Actions-blue)
+
+## 📋 프로젝트 소개
+
+**채우다**는 부동산 매물 관리 및 거래 플랫폼으로, Django 프레임워크를 활용한 백엔드 API 서버입니다. 사용자가 부동산 매물을 쉽게 등록하고 검색할 수 있는 서비스를 구현했습니다.
+
+### 주요 특징
+- **매물 관리 시스템**: 다양한 유형의 부동산 매물 등록 및 관리
+- **실시간 채팅**: WebSocket을 활용한 실시간 채팅 기능으로 판매자-구매자 간 소통
+- **위치 기반 서비스**: 주소 및 좌표 기반 매물 검색
+- **API 기반 설계**: RESTful API 패턴을 통한 확장 가능한 서비스 구조
+- **컨테이너 기반 배포**: Docker와 GitHub Actions를 활용한 CI/CD 파이프라인
+
+## 🔧 기술 스택
+
+### 백엔드
+- **언어 & 프레임워크**: Python 3.12, Django 5.1.6
+- **API**: Django Ninja
+- **데이터베이스**: PostgreSQL
+- **비동기 처리**: Django Channels (WebSocket)
+- **인증**: JWT 토큰 기반 인증
+
+### 인프라
+- **컨테이너화**: Docker, Docker Compose
+- **웹 서버**: Nginx
+- **CI/CD**: GitHub Actions
+- **SSL/TLS**: Let's Encrypt
+- **클라우드 서비스**: AWS
+- **스토리지**: AWS S3
+
+## 💻 주요 기능
+
+### 1. 인증 및 사용자 관리
+- JWT 기반 사용자 인증
+- 이메일 인증 시스템
+- 소셜 로그인 (Google)
+- 사용자 프로필 관리
+
+### 2. 매물 관리
+- 매물 등록, 수정, 삭제, 조회
+- 다양한 매물 유형 지원 (단독주택, 다세대 등)
+- 상세 매물 정보 관리 (평수, 가격, 난방방식 등)
+- 매물 이미지 및 동영상 관리
+
+### 3. 위치 기반 서비스
+- 주소 관리 및 좌표 변환
+- 위치 기반 매물 검색
+- 지도 API 연동
+
+### 4. 실시간 채팅
+- WebSocket을 활용한 실시간 메시지
+- 매물별 채팅방 관리
+- 1:1 채팅 지원
+
+### 5. 관심 매물 관리
+- 매물 찜하기 기능
+- 관심 매물 목록 관리
+
+## 🗂️ 프로젝트 구조
+
 ```
+채우다(Chaeuda)/
+├── django/                 # Django 애플리케이션
+│   ├── a_core/             # 프로젝트 설정 및 코어
+│   ├── a_apis/             # API 엔드포인트 및 비즈니스 로직
+│   ├── a_user/             # 사용자 관련 기능
+│   ├── a_chat/             # 채팅 시스템
+│   └── a_common/           # 공통 모듈 및 유틸리티
+├── nginx/                  # Nginx 설정
+└── scripts/                # 유틸리티 스크립트
+```
+
+## 🏗️ 시스템 아키텍처
+
+채우다 프로젝트는 마이크로서비스 지향적 아키텍처로 설계되어 있으며, Docker 컨테이너 기반으로 배포됩니다.
+
+```mermaid
+flowchart TD
+    %% 주요 구성요소 정의
+    Client([클라이언트 앱])
+    Nginx{Nginx}
+    ASGI[Django ASGI]
+    WSGI[Django WSGI]
+    Django{{Django 애플리케이션}}
+    DB[(PostgreSQL)]
+    Redis[(Redis)]
+    S3[(AWS S3)]
+    
+    %% 주요 모듈 정의
+    Core([a_core])
+    Apis([a_apis])
+    User([a_user])
+    Chat([a_chat])
+    Common([a_common])
+    
+    %% 연결 관계
+    Client -->|HTTPS/WSS| Nginx
+    Nginx -->|WS| ASGI
+    Nginx -->|HTTP| WSGI
+    ASGI --> Django
+    WSGI --> Django
+    
+    Django --> Core & Apis & User & Chat & Common
+    Django <-->|READ/WRITE| DB
+    Django <-->|캐싱/메시징| Redis
+    Django <-->|파일 저장| S3
+```
+
+### 주요 컴포넌트 설명
+
+1. **프론트엔드**: 웹/모바일 클라이언트 애플리케이션
+2. **인프라 계층**:
+   - **Nginx**: 리버스 프록시 및 로드 밸런서 역할, 정적 파일 제공
+   - **Docker**: 컨테이너화된 서비스 관리
+3. **백엔드 서버 계층**:
+   - **Django ASGI (Daphne)**: WebSocket 처리, 실시간 채팅 기능
+   - **Django WSGI (Gunicorn)**: HTTP API 요청 처리
+4. **애플리케이션 계층**:
+   - **a_core**: 프로젝트 핵심 설정 및 URL 라우팅
+   - **a_apis**: API 엔드포인트, 모델, 서비스 로직
+   - **a_user**: 사용자 관리 및 인증
+   - **a_chat**: 실시간 채팅 시스템
+   - **a_common**: 공통 유틸리티
+5. **데이터 계층**:
+   - **PostgreSQL**: 관계형 데이터베이스
+   - **Redis**: 캐싱, 세션 관리, 실시간 채팅 채널 레이어
+   - **AWS S3**: 이미지 및 동영상 스토리지
+
+## 🔍 주요 API 엔드포인트
+
+### 인증 API
+- `POST /api/auth/signup/`: 회원가입
+- `POST /api/auth/login/`: 로그인
+- `POST /api/auth/refresh/`: 토큰 갱신
+- `POST /api/auth/email-verification/`: 이메일 인증
+
+### 사용자 API
+- `GET /api/users/me/`: 내 정보 조회
+- `PATCH /api/users/me/`: 내 정보 수정
+
+### 매물 API
+- `GET /api/products/`: 매물 목록 조회
+- `POST /api/products/`: 매물 등록
+- `GET /api/products/{id}/`: 매물 상세 조회
+- `PUT /api/products/{id}/`: 매물 수정
+- `DELETE /api/products/{id}/`: 매물 삭제
+- `POST /api/products/{id}/likes/`: 관심 매물 등록/해제
+
+### 채팅 API
+- `GET /api/chats/list/`: 내 채팅방 목록
+- `POST /api/chats/create/`: 채팅방 생성
+- WebSocket 연결: `ws://domain/ws/chat/{room_id}/`
+
+## 📊 ERD 설계
+![ERD 설계]()
+
+## 🚀 로컬 개발 환경 설정
+
+### 사전 요구사항
+- Python 3.12 이상
+- Poetry
+- Docker & Docker Compose
+
+### 설치 및 실행
+
+1. 레포지토리 클론
+```bash
 git clone git@github.com:chaeuda-TEAM/oz-main-be-06-team2.git
+cd oz-main-be-06-team2
 ```
 
-- 폴더 이동
-```
-cd MERN-06-BE
-```
-
-- 포이트리 가상환경 설치
-```
+2. Poetry로 의존성 설치
+```bash
 poetry install
-```
-
-- 가상환경 실행
-```
 poetry shell
 ```
 
-- 장고 폴더로 이동
-```
+3. Django 설정
+```bash
 cd django
-```
-
-- 장고 마이그레이션
-```
 poetry run python manage.py makemigrations --settings=a_core.settings.development
 poetry run python manage.py migrate --settings=a_core.settings.development
 ```
 
-- 프로젝트 실행
-```
+4. 개발 서버 실행
+```bash
 poetry run python manage.py runserver --settings=a_core.settings.development
 ```
 
-- 브라우저에서 스웨거 실행
+5. API 문서 접속
 ```
 http://127.0.0.1:8000/api/docs
 ```
 
+### Docker를 통한 실행
+```bash
+docker-compose up -d
+```
+
+## 🔄 CI/CD 워크플로우
+
+GitHub Actions를 통한 CI/CD 파이프라인:
+- develop → main 브랜치 병합 시 자동 배포
+- 테스트 자동화 및 품질 검사
+- Docker 이미지 빌드 및 배포
+- 데이터베이스 마이그레이션 자동화
+
+## 📝 성과 및 배운 점
+
+- **확장 가능한 아키텍처 설계**: 마이크로서비스 지향적인 구조로 모듈 간 의존성 최소화
+- **실시간 기능 구현**: WebSocket을 활용한 실시간 채팅 시스템 구축
+- **클라우드 서비스 활용**: AWS S3, RDS 등 클라우드 서비스 통합
+- **CI/CD 자동화**: GitHub Actions을 활용한 배포 파이프라인 구축
+- **보안 강화**: JWT 토큰 기반 인증 및 HTTPS 적용
+
+## 📈 향후 개선 계획
+
+- 알림 시스템 구축 (FCM, WebPush)
+- 검색 기능 최적화 (Elasticsearch 도입)
+- 추천 시스템 구현
+- 성능 모니터링 도입 (Prometheus, Grafana)
+- 다국어 지원 확장
+
+## 👨‍💻 팀 구성원
+
+- **백엔드 개발**: 팀 채우다
+- **이메일**: team@chaeuda.shop
+- **웹사이트**: https://chaeuda.shop
+- **GitHub**: https://github.com/chaeuda-TEAM
+
 ---
----
-### 1. 프로젝트 개요
-이 프로젝트는 Django 기반의 백엔드 API 서버로, Poetry를 사용한 의존성 관리와 Docker를 통한 컨테이너화를 구현하고 있습니다.
 
-### 2. 주요 디렉토리 구조
-```
-django/
-├── a_core/           # 프로젝트 코어 설정
-├── a_apis/           # API 관련 로직
-├── a_user/           # 사용자 관리
-├── a_common/         # 공통 기능
-└── templates/        # HTML 템플릿
-
-nginx/                # Nginx 설정
-```
-
-### 3. 주요 컴포넌트 설명
-
-#### A. 설정 관리 (a_core)
-- 다중 환경 설정 (development, production, dev-aws)
-- 보안 설정 및 데이터베이스 설정
-- URL 라우팅
-
-#### B. API 구현 (a_apis)
-- Ninja API 프레임워크 사용
-- 주요 엔드포인트:
-  - 인증 (auth/)
-  - 사용자 관리 (users/)
-  - 상태 체크 (health/)
-  - 법적 문서 (legal/)
-
-#### C. 사용자 관리 (a_user)
-- 커스텀 User 모델
-- 이메일 인증 기능
-- 소셜 로그인 (Google) 지원
-
-#### D. 인프라 설정
-1. Nginx 설정:
-
-```1:74:nginx.conf
-worker_processes auto;
-pid /run/nginx.pid;
-
-events {
-    worker_connections 1024;
-}
-
-http {
-    include /etc/nginx/mime.types;
-    default_type application/octet-stream;
-
-    sendfile on;
-    keepalive_timeout 65;
-    types_hash_max_size 2048;
-    types_hash_bucket_size 64;
-
-    upstream web_backend {
-        server web:8000;  # 컨테이너 이름을 실제 컨테이너 이름으로 수정
-    }
-
-    # 로그 설정
-    access_log /var/log/nginx/access.log;
-    error_log /var/log/nginx/error.log warn;
-
-    # 서버 블록 - HTTP -> HTTPS 리디렉션
-    server {
-        listen 80;
-        server_name api.chaeuda.shop;
-        return 301 https://$host$request_uri;
-    }
-
-    # 서버 블록 - HTTPS 설정
-    server {
-        listen 443 ssl;
-        server_name api.chaeuda.shop;
-
-        ssl_certificate /etc/letsencrypt/live/api.chaeuda.shop/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/api.chaeuda.shop/privkey.pem;
-
-        ssl_protocols TLSv1.2 TLSv1.3;
-        ssl_prefer_server_ciphers on;
-        ssl_ciphers "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256";
-
-        # SSL 설정 추가
-        ssl_session_cache shared:SSL:10m;
-        ssl_session_timeout 10m;
-        ssl_session_tickets off;
-        ssl_stapling on;
-        ssl_stapling_verify on;
-        resolver 8.8.8.8 8.8.4.4 valid=300s;
-        resolver_timeout 5s;
-
-        location / {
-            proxy_pass http://web_backend;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-
-        location /static/ {
-            alias /app/static/;  # 여기에 정적 파일이 있는 경로를 설정
-        }
-
-        location /media/ {
-            alias /app/media/;
-        }
-
-        error_page 500 502 503 504 /50x.html;
-        location = /50x.html {
-            root /usr/share/nginx/html;
-        }
-    }
-}
-```
-
-
-2. Docker 구성:
-
-```1:43:docker-compose.yml
-version: '3.8'
-
-services:
-  web:
-    build:
-      context: .
-      dockerfile: django/Dockerfile
-    command: gunicorn a_core.wsgi:application --bind 0.0.0.0:8000
-    volumes:
-      - ./django/:/app/
-      - static_volume:/app/static
-      - media_volume:/app/media
-    env_file:
-      - ./django/.env
-    networks:
-      - backend-network
-    environment:
-      - DJANGO_SETTINGS_MODULE=a_core.settings.product
-
-  nginx:
-    image: nginx:1.21-alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./django/static:/app/static
-      - ./django/media:/app/media
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-      - static_volume:/app/static
-      - media_volume:/app/media
-    depends_on:
-      - web
-    networks:
-      - backend-network
-
-volumes:
-  static_volume:
-  media_volume:
-
-networks:
-  backend-network:
-    driver: bridge 
-```
-
-
-### 4. 주요 기능
-1. 인증 시스템
-   - JWT 기반 인증
-   - Google OAuth 통합
-   - 이메일 인증
-
-2. 보안 기능
-   - HTTPS 리다이렉션
-   - CORS 설정
-   - 쿠키 보안
-
-3. 데이터베이스
-   - PostgreSQL 지원
-   - AWS RDS 연동 가능
-
-4. 파일 저장
-   - AWS S3 통합
-   - 정적/미디어 파일 관리
-
-### 5. 개발 도구
-- Poetry 의존성 관리
-- Black 코드 포맷터
-- pre-commit 훅
-- Docker 컨테이너화
-
-### 6. 배포 구성
-- GitHub Actions를 통한 CI/CD
-- Docker Compose 기반 배포
-- Nginx 리버스 프록시
-- SSL/TLS 지원
-
-이 구조는 확장 가능하고 유지보수가 용이한 현대적인 Django 백엔드 애플리케이션의 좋은 예시를 보여주고 있습니다.
-
-
+© 2025 채우다(Chaeuda) 프로젝트
 
 # 풀리퀘 작성 방법
 1. 풀리퀘 작성 전 현재 브랜치 상태 확인
 ```
+git status
+```
+
+2. 풀리퀘 작성 전 브랜치 업데이트
+```
+git pull origin main
+```
+
+test can merge
 git status
 ```
 
